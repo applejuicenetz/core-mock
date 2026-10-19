@@ -129,6 +129,7 @@ class State:
         self.connected_since = 0
         self.firewalled = "false"
         self.exited = False
+        self.sharecheck_running = False
         self.last_tick = time.time()
         self.connecting = -1
         self.connecting_since = 0.0
@@ -854,7 +855,11 @@ class State:
                 return f"error: {exc}"
             self.password_md5 = new.lower()  # The running request was already authenticated with the old hash.
             return "ok"
-        if name in ("sharecheck", "stopsharecheck"):
+        if name == "sharecheck":
+            self.sharecheck_running = True  # Start is only acknowledged; progress is not queryable.
+            return "ok"
+        if name == "stopsharecheck":
+            self.sharecheck_running = False  # Answers ok whether or not a check was running.
             return "ok"
         if name == "exitcore":
             self.exited = True
@@ -1082,7 +1087,7 @@ class Handler(BaseHTTPRequestHandler):
             raise Redirect("/help")
         name = lowered[1]
         if name == "information.xml":
-            return head + '<applejuice><generalinformation><version>0.35.185.93</version><filesystem seperator="/"/><system>Linux</system></generalinformation></applejuice>', "text/xml"
+            return head + '<applejuice><generalinformation><version>0.35.187.3</version><filesystem seperator="/"/><system>Linux</system></generalinformation></applejuice>', "text/xml"
         if name == "getsession.xml":
             sid = st.new_session(self.client_address[0])
             return head + f'<applejuice>\n<session id="{sid}"/>\n</applejuice>', "text/xml"

@@ -164,6 +164,15 @@ class MockTests(unittest.TestCase):
         state = State('busy', EMPTY_PASSWORD_MD5)
         self.assertTrue(all(s['host'].endswith('.example') for s in state.servers.values()))
 
+    def test_sharecheck_start_and_stop(self):
+        state = State('busy', EMPTY_PASSWORD_MD5)
+        self.assertEqual(state.action('stopsharecheck', {}), 'ok')  # ok even when nothing runs
+        self.assertFalse(state.sharecheck_running)
+        self.assertEqual(state.action('sharecheck', {}), 'ok')
+        self.assertTrue(state.sharecheck_running)
+        self.assertEqual(state.action('stopsharecheck', {}), 'ok')
+        self.assertFalse(state.sharecheck_running)
+
     def test_share_object_lookup(self):
         state = State('busy', EMPTY_PASSWORD_MD5)
         share_id = next(iter(state.shares))
