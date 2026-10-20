@@ -16,7 +16,7 @@
 
 - Never reference Core source code in code, comments, docstrings, tests, README or this file: no Core class, method or file names (e.g. `XmlServer`, `Download.setStatus`, `AJClient`) and no paths into `core-src`. Describe the observable API behavior instead.
 - All objects share one ID space: shares, downloads, users, uploads, servers, searches, search entries, `information`, `networkinfo`. Every reference (`shareid`, `downloadid`, `searchid`) must resolve; a download `shareid` is `-1` until a part-file share exists (`State.attach_part_share`).
-- Uploads only use status 1 (active) and 2 (queued). Queued slots have positions `-1` and speed 0; `loaded` is a percent (`-1` unknown). Hashes come from `file_hash(name, size)`.
+- Uploads only use status 1 (active) and 2 (queued). Queued slots have positions `-1` and speed 0; `loaded` is a fraction 0.0..1.0 of the file the remote peer has (`-1.0` unknown), not a percent. Hashes come from `file_hash(name, size)`.
 - `modified.xml`: no `session` returns full `ids`; a valid `session` (from `getsession.xml`, bound to client IP, expires after `SESSION_TTL`) returns the `removed` queue, which reading clears. `timestamp` filters with `>=`. `sync_objects` stamps changes and fills the queues.
 - `mode=zip` is zlib. Auth failure is an empty 302 to `/wrongpassword`, unknown path 302 to `/help`, bad session 302 to `/wrongsession`.
 
