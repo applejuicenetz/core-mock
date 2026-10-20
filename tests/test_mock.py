@@ -34,7 +34,7 @@ class MockTests(unittest.TestCase):
                                  ('-1', '-1', '-1', '0'))
             else:
                 self.assertTrue(int(u.get('uploadfrom')) <= int(u.get('actualuploadposition')) <= int(u.get('uploadto')))
-            self.assertTrue(float(u.get('loaded')) == -1.0 or 0.0 <= float(u.get('loaded')) <= 100.0)
+            self.assertTrue(float(u.get('loaded')) == -1.0 or 0.0 <= float(u.get('loaded')) <= 1.0)
 
     def test_every_reference_points_to_an_existing_object(self):
         state = State('busy', EMPTY_PASSWORD_MD5)

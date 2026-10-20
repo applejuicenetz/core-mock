@@ -225,10 +225,10 @@ class State:
         self.add_download("abgebrochen.rar", 220_000_000, ready=1_000_000, status=17)
         self.add_download("fertig.tar.gz", 8_000_000, ready=8_000_000, status=14)
         self.add_download("suchend.bin", 99_000_000, ready=0, sources=[])
-        # (nick, status, speed, directstate, remote load percent). Queued slots have no positions or speed.
-        uploads = [("alice", 1, 180_000, 1, 37.5), ("gerd", 2, 0, 0, -1.0), ("heidi", 2, 0, 1, 0.0),
-                   ("ivan", 2, 0, 2, 12.0), ("judy", 1, 64_000, 2, 100.0), ("karl", 2, 0, 2, -1.0),
-                   ("lena", 1, 32_000, 1, 62.25)]
+        # (nick, status, speed, directstate, remote completion fraction 0..1). Queued slots have no positions or speed.
+        uploads = [("alice", 1, 180_000, 1, 0.375), ("gerd", 2, 0, 0, -1.0), ("heidi", 2, 0, 1, 0.0),
+                   ("ivan", 2, 0, 2, 0.12), ("judy", 1, 64_000, 2, 1.0), ("karl", 2, 0, 2, -1.0),
+                   ("lena", 1, 32_000, 1, 0.6225)]
         names = ["debian-13.7.0-amd64-netinst.iso", "ajcore.jar", "linux.iso", "movie.mkv",
                  "verbinde.bin", "indirekt.bin", "fehler.bin"]
         for i, (nick, status, speed, direct, loaded) in enumerate(uploads):
