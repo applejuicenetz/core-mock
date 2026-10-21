@@ -28,6 +28,8 @@ python3 src/mock_core.py --iso-count 0            # keine synthetischen ISOs
 python3 src/mock_core.py --shareidx-output runtime/shareidx.xml
 ```
 
+Das Szenario `busy` enthält zusätzlich Downloads, Uploads, Shares (`/mock/long-names`) und ein Suchergebnis (`long`) mit sehr langen Debian- und Ubuntu-ISO-Namen, langen Nicks und Zielverzeichnissen für Umbruchtests.
+
 `--help` zeigt alle Optionen. Prüfsummen und Share-Index (Standard 3,5 MB) sind deterministische Testwerte, Dateiinhalte werden nicht erzeugt.
 
 ## Sicherheit

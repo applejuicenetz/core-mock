@@ -241,7 +241,7 @@ class State:
                                 "priority": 1, "lastasked": now_ms() - 60_000, "askcount": i, "searchcount": i * 2}
             active = status == 1
             self.uploads[uid] = {"id": uid, "shareid": sid, "version": "0.35.185.93", "os": 1 + i % 3,
-                                 "status": status, "directstate": direct, "priority": 100 - i * 10,
+                                 "status": status, "directstate": direct, "priority": 1 if i % 2 else 100 - i * 10,
                                  "nick": nick, "from": 0 if active else -1, "pos": 2_000_000 * (i + 1) if active else -1,
                                  "to": 10_000_000 * (i + 1) if active else -1,
                                  "lastconnection": now_ms(), "speed": speed, "loaded": loaded}
@@ -356,6 +356,70 @@ class State:
         if (self.BIG_DIR, "subdirectory") not in self.share_dirs:
             self.share_dirs.append((self.BIG_DIR, "subdirectory"))
         return count
+
+    LONG_DIR = "/mock/long-names"
+    LONG_STEMS = [
+        "ubuntu-26.04.{n}-desktop-amd64-with-proprietary-nvidia-drivers-and-extra-multimedia-codecs-minimal-installer-image",
+        "debian-live-13.7.0-amd64-with-non-free-firmware-and-all-desktop-environments-gnome-kde-xfce-cinnamon-mate-lxqt-{n}",
+        "ubuntu-24.04.{n}-live-server-arm64-with-hardware-enablement-kernel-and-cloud-init-autoinstall-support-for-raspberry-pi",
+        "debian-13.7.0-amd64-DVD-{n}-complete-installation-set-with-security-updates-and-source-packages-for-offline-installs",
+        "ubuntu-studio-25.10.{n}-dvd-amd64-with-lowlatency-kernel-jack-audio-pipewire-and-full-creative-software-suite",
+        "debian-edu-13.7.0-amd64-netinst-skolelinux-ltsp-server-workstation-profile-with-german-localisation-extras-{n}",
+        "kubuntu-25.04.{n}-desktop-amd64-plasma-6-wayland-session-with-restricted-extras-and-flatpak-integration-enabled",
+    ]
+    LONG_EXTS = ["iso", "iso", "iso", "iso.zsync", "iso", "img.xz"]
+    LONG_NICKS = ["a-remarkably-long-nickname-for-wrapping-tests", "Nutzer mit Leerzeichen und Ümläuten im Namen",
+                  "short", "UPPERCASE_NICK_WITHOUT_SEPARATORS_AND_VERY_LONG_FOR_TESTS"]
+
+    def long_name(self, n: int) -> str:
+        stem = self.LONG_STEMS[n % len(self.LONG_STEMS)].format(n=n)
+        return f"{stem}.{self.LONG_EXTS[n % len(self.LONG_EXTS)]}"
+
+    def add_long_names(self, downloads: int = 24, uploads: int = 16, shares: int = 40) -> int:
+        """Add downloads, uploads, shares and a search with very long file names, nicks and target directories."""
+        added = 0
+        statuses = [0, 0, 0, 18, 17, 14]
+        for n in range(downloads):
+            name = self.long_name(n)
+            size = (50 + n * 137) * 1_000_000
+            status = statuses[n % len(statuses)]
+            sources = [] if status in (14, 17) or n % 7 == 6 else [
+                (7 if k == 0 and status == 0 else 5 if k % 2 else 1, 120_000 // (k + 1) if k == 0 and status == 0 else 0,
+                 self.LONG_NICKS[(n + k) % len(self.LONG_NICKS)]) for k in range(1 + n % 3)]
+            target = "Videos/a-very-long-target-directory-name-for-wrapping-tests/subdirectory" if n % 5 == 0 else ""
+            self.add_download(name, size, ready=size if status == 14 else size * (n % 9) // 10, status=status,
+                              pdl=n % 13, target=target, sources=sources, partshare=n % 4 == 0)
+            added += 1
+        for n in range(uploads):
+            name = self.long_name(n + 100)
+            size = (80 + n * 211) * 1_000_000
+            sid = self.new_id()
+            self.shares[sid] = {"id": sid, "filename": f"{self.LONG_DIR}/{name}", "short": name, "size": size,
+                                "checksum": file_hash(name, size), "priority": 1 + n % 5, "lastasked": now_ms() - 60_000 * n,
+                                "askcount": n, "searchcount": n * 2}
+            active = n % 3 == 0
+            uid = self.new_id()
+            self.uploads[uid] = {"id": uid, "shareid": sid, "version": "0.35.185.93", "os": 1 + n % 3,
+                                 "status": 1 if active else 2, "directstate": n % 3, "priority": 1 + n % 5 if n % 2 else 100 - n,
+                                 "nick": self.LONG_NICKS[n % len(self.LONG_NICKS)],
+                                 "from": 0 if active else -1, "pos": 3_000_000 * (n + 1) if active else -1,
+                                 "to": 12_000_000 * (n + 1) if active else -1, "lastconnection": now_ms(),
+                                 "speed": 48_000 * (n % 4 + 1) if active else 0, "loaded": (n % 5) / 4 if n % 6 else -1.0}
+            added += 1
+        for n in range(shares):
+            name = self.long_name(n + 200)
+            size = (5 + n * 97) * 1_000_000
+            sid = self.new_id()
+            self.shares[sid] = {"id": sid, "filename": f"{self.LONG_DIR}/{name}", "short": name, "size": size,
+                                "checksum": file_hash(name, size), "priority": 1 + n % 5,
+                                "lastasked": now_ms() - 3_600_000 * n if n % 2 else 0, "askcount": n % 17, "searchcount": n % 29}
+            added += 1
+        self.add_search("long", running=False, results=[
+            (self.long_name(n + 300), (30 + n * 71) * 1_000_000,
+             [(self.long_name(n + 300), 2 + n), (self.long_name(n + 301), 1 + n % 4)]) for n in range(12)])
+        if (self.LONG_DIR, "subdirectory") not in self.share_dirs:
+            self.share_dirs.append((self.LONG_DIR, "subdirectory"))
+        return added
 
     def scenario_firewalled(self):
         self.scenario_busy()
@@ -1149,6 +1213,7 @@ def run(host: str, port: int, scenario: str, password: str | None, verbose: bool
         state.add_iso_catalog(iso_count)
         if scenario == 'busy':
             state.add_big_directory()
+            state.add_long_names()
     print(json.dumps({'shareidx_bytes': len(index) if index else 0, 'shares': len(state.shares), 'share_api_bytes': len(state.share_xml().encode())}), flush=True)
     Handler.state = state
     del index  # Release the generated disk-index fixture after startup.

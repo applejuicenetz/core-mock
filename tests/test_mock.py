@@ -79,6 +79,29 @@ class MockTests(unittest.TestCase):
         self.assertEqual(len(in_dir), 450)
         self.assertTrue(any(state.shares[u['shareid']]['filename'].startswith(state.BIG_DIR) for u in state.uploads.values()))
 
+    def test_uploads_mix_normal_and_boosted_priorities(self):
+        state = State('busy', EMPTY_PASSWORD_MD5)
+        state.add_long_names()
+        for status in (1, 2):
+            rows = [u for u in state.uploads.values() if u['status'] == status]
+            self.assertTrue(any(u['priority'] == state.shares[u['shareid']]['priority'] for u in rows))
+            self.assertTrue(any(u['priority'] > state.shares[u['shareid']]['priority'] + 10 for u in rows))
+
+    def test_long_names_cover_all_views(self):
+        state = State('busy', EMPTY_PASSWORD_MD5)
+        downloads, uploads, searches = len(state.downloads), len(state.uploads), len(state.searches)
+        state.add_long_names()
+        new_downloads = list(state.downloads.values())[downloads:]
+        new_uploads = list(state.uploads.values())[uploads:]
+        self.assertGreaterEqual(len(new_downloads), 20)
+        self.assertGreaterEqual(len(new_uploads), 10)
+        self.assertGreater(len(state.searches), searches)
+        self.assertTrue(all(len(d['filename']) > 80 for d in new_downloads))
+        self.assertTrue(all(len(state.shares[u['shareid']]['short']) > 80 for u in new_uploads))
+        self.assertTrue(all(('ubuntu' in d['filename'] or 'debian' in d['filename']) for d in new_downloads))
+        self.assertIn(('/mock/long-names', 'subdirectory'), state.share_dirs)
+        ET.fromstring(state.share_xml())  # Non-ASCII names stay well-formed.
+
     def test_settings_escape_special_characters(self):
         state = State('busy', EMPTY_PASSWORD_MD5)
         name = '/mock/Ä & "quoted" <folder>'
