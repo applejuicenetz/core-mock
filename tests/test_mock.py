@@ -87,6 +87,11 @@ class MockTests(unittest.TestCase):
             self.assertTrue(any(u['priority'] == state.shares[u['shareid']]['priority'] for u in rows))
             self.assertTrue(any(u['priority'] > state.shares[u['shareid']]['priority'] + 10 for u in rows))
 
+    def test_download_power_levels_follow_core_rules(self):
+        state = State('busy', EMPTY_PASSWORD_MD5)
+        state.add_long_names()
+        self.assertTrue(all(d['powerdownload'] == 0 or 12 <= d['powerdownload'] <= 490 for d in state.downloads.values()))
+
     def test_long_names_cover_all_views(self):
         state = State('busy', EMPTY_PASSWORD_MD5)
         downloads, uploads, searches = len(state.downloads), len(state.uploads), len(state.searches)

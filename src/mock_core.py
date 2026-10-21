@@ -388,7 +388,7 @@ class State:
                  self.LONG_NICKS[(n + k) % len(self.LONG_NICKS)]) for k in range(1 + n % 3)]
             target = "Videos/a-very-long-target-directory-name-for-wrapping-tests/subdirectory" if n % 5 == 0 else ""
             self.add_download(name, size, ready=size if status == 14 else size * (n % 9) // 10, status=status,
-                              pdl=n % 13, target=target, sources=sources, partshare=n % 4 == 0)
+                              pdl=(0, 12, 22, 50, 120, 490)[n % 6], target=target, sources=sources, partshare=n % 4 == 0)
             added += 1
         for n in range(uploads):
             name = self.long_name(n + 100)
