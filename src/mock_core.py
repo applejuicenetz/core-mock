@@ -573,7 +573,7 @@ class State:
         return f"<information {attrs(credits=self.credits, sessionupload=123456, sessiondownload=654321, uploadspeed=ul, downloadspeed=dl, openconnections=len(self.users), maxuploadpositions=50)}/>"
 
     def networkinfo_row(self):
-        return (f"<networkinfo {attrs(users=450, files=4191120, filesize='1449.57', firewalled=self.firewalled, ip='203.0.113.7', tryconnecttoserver=self.connecting, connectedwithserverid=self.connected_server, connectedsince=self.connected_since, paused='false')}>\n"
+        return (f"<networkinfo {attrs(users=450, files=4191120, filesize='1484359.68', firewalled=self.firewalled, ip='203.0.113.7', tryconnecttoserver=self.connecting, connectedwithserverid=self.connected_server, connectedsince=self.connected_since, paused='false')}>\n"
                 f"<welcomemessage>Mock Core: welcome to the synthetic network</welcomemessage></networkinfo>")
 
     def information_xml(self):

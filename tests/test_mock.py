@@ -424,11 +424,12 @@ class XmlContractTests(unittest.TestCase):
             tags[kind] = ET.fromstring(f"<r>{state.find_object(oid)}</r>")[0].tag
         self.assertEqual(tags, {k: k for k in ('share', 'download', 'user', 'upload', 'server', 'search', 'searchentry', 'information', 'networkinfo')})
 
-    def test_networkinfo_filesize_is_gigabytes_with_two_decimals(self):
+    def test_networkinfo_filesize_is_mebibytes_with_two_decimals(self):
         state = State('busy', EMPTY_PASSWORD_MD5)
         net = ET.fromstring(state.networkinfo_row())
         self.assertRegex(net.get('filesize'), r'^\d+\.\d\d$')
-        self.assertLess(float(net.get('filesize')), 1_000_000)  # GB, not bytes
+        # The Core reports the network share size in MiB (bytes / 1048576), not GB and not bytes.
+        self.assertEqual(round(float(net.get('filesize')) / 1024, 2), 1449.57)  # 1449.57 GiB fixture
 
 
 class HttpTests(unittest.TestCase):
